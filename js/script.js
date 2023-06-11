@@ -1,15 +1,15 @@
-const player=1, dealer=1, none = 0;   //플레이어, 딜러
-let player_card;   //플레이어 카드값
-let dealer_card;   //딜러 카드값
-let player_deck = []; // 플레이어 덱
-let winner;   //승자
+const player=1, dealer=1, none = 0;   //플레이어, 딜러 
+let turn_player, player_card, dealer_card; //현재 턴 주인공
 let win, lose, draw = 0;    //승점
-let deal, hit, stand = 0;   //플레이어의 선택 => 선택 활성화 됐을 경우 1로 값 변경하여 조건 만족
 let card = ['A','2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']    //카드 배열
-let standing = false;   //stand 버튼 눌렀을 떄 활성화
-let turnEnd = false;    //딜러 턴이 끝났을 때 활성화
+let standing, turnEnd, gameOver= false;   //stand 버튼 눌렀을 떄 활성화, 딜러 턴 끝났을때 활성화
+let BlackJack = {
+  'Player' : {'scorespan' : '#player_blackjack_point', 'div' : '#player_area', 'score' : 0},
+  'Dealer' : {'scorespan' : '#dealer_blackjack_point', 'div' : '#dealer_area', 'score' : 0},
+  'Card' : ['A','2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
+  'Value' : {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7,'8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': [1, 11]},
+} ;
 
-// standing == true && turnEnd == true 일 경우 승자 판별로 넘어가는 조건 만족
 
 //Hit 버튼을 눌렀을 경우에 발생하는 이벤트 => 플레이어에게 카드 배분
 document.querySelector('#hit_btn').addEventListener('click', Hit); 
@@ -18,112 +18,104 @@ document.querySelector('#hit_btn').addEventListener('click', Hit);
 document.querySelector('#stand_btn').addEventListener('click', Stand);
 
 //Deal 버튼을 눌렀을 경우에 발생하는 이벤트 => 초기화 후 게임 시작
-document.querySelector('#deal_btn').addEventListener('click', Again);
+document.querySelector('#deal_btn').addEventListener('click', Deal);
 
 
-//카드 값을 계산하기 위한 함수. A는 플레이어 카드 값에 따라 11과 1로 저장.
-function calculatePlayerCardValue(cards) {
-    let aceCount = 0;
-  
-    for (let i = 0; i < cards.length; i++) {
-      let cardValue;
-      if (cards[i] === 'A') {
-        cardValue = 11;
-        aceCount++;
-      } else if (cards[i] === 'J' || cards[i] === 'Q' || cards[i] === 'K') {
-        cardValue = 10;
-      } else {
-        cardValue = parseInt(cards[i]);
-      }
-  
-      player_card += cardValue;
-    }
-  
-    while (player_card > 21 && aceCount > 0) {
-      player_card -= 10;
-      aceCount--;
-    }
-  
-    return player_card;
-  }
-  
-  function Hit() {
-    if (!standing && !turnEnd) {
-      // 플레이어의 카드 배열에 무작위 카드 추가
-      const randomIndex = Math.floor(Math.random() * card.length);
-      const randomCard = card[randomIndex];
-      player_deck.push(randomCard);
-  
-      // 플레이어의 카드 현황 콘솔에 출력
-      console.log("플레이어 카드:", player_deck);
-  
-      // 플레이어의 카드 총합 계산
-      const player_card = calculatePlayerCardValue(player_deck);
-      console.log("총점:", player_card);
-
-       // 플레이어의 카드 총합을 화면에 출력
-       document.querySelector("#player_blackjack_point").textContent = player_card;
-
-  
-      // 총합이 21을 초과하는지 확인
-      if (player_card > 21) {
-        alert("버스트! 21을 넘겼습니다.");
-        return player_card;
-      } else {
-        // 플레이어에게 Hit 또는 Stand 선택 안내
-        hit = 1;
-        stand = 1;
+//stand 상태 아닐 때 램덤한 카드 나눠주기
+function Hit() { //딜러가 Hit을 할 리는 없으니 player로 
     
-      }
+    console.log('click!')
+    if(!standing && !turnEnd){
+      const card = Rand();
+            showcard(card, BlackJack['Player']);
+            score(card, BlackJack['Player']);
+       }
+}
 
-
-    }
-  }
   
+//카드 보여주기
+function showcard(card, turn_player) {
+  const cardimg = document.createElement('img'); //카드 이미지 엘리먼트 만들기
+  cardimg.src = `img/${card}.png`;                //randomnumber에서 리턴한 값으로 카드 뽑기
+  cardimg.style = 'width:200px';                 
+    document.querySelector(turn_player['div']).appendChild(cardimg);    //카드 이미지 #turn_player_area에 출력
+}
 
+
+//랜덤 값 뽑기
+const Rand = () => {
+  const randomnumber = Math.floor(Math.random()*13)+1;
+  console.log(randomnumber);
+  return BlackJack.Card[randomnumber];
+}
+
+//딜러 턴으로
 function Stand(){
-    if (hit === 1) {
         standing = true;
         turnEnd = true;
         DealerTurn();
+}
+
+
+//점수 
+function score(card, turn_player){
+
+    if(card==='A')
+        calculateAceValue(turn_player);
+    else if(card === 'J' || card === 'Q' || card === 'K')
+        calculateCardValue(card, turn_player)
+    else {
+        turn_player.score+=parseInt(card);
     }
+    if(turn_player.score>21)
+    {
+        document.querySelector(turn_player['scorespan']).textContent = '버스트';
+        Stand();
+    }
+    else
+        document.querySelector(turn_player['scorespan']).textContent = turn_player.score;
 }
 
-
-function Stand() {
-  if (hit === 1)  {
-      standing = true;
-      turnEnd = true;
-      DealerTurn();
-  }
-}
-
-function Again() {
-    player_card = 0;
-    dealer_card = 0;
-    winner = none;
-    standing = false;
-    turnEnd = false;
-  }
-
-  function DealerTurn() {
-    while (dealer_card < 17) {
-      let randomCardIndex = Math.floor(Math.random() * card.length);
-      let drawnCard = card[randomCardIndex];
-      dealer_card += getCardValue(drawnCard);
-      // 딜러에게 카드를 배분하는 로직을 추가했습니다.
-      // dealer_card 값을 업데이트합니다.
+//Ace 카드 값 결정
+function calculateAceValue(turn_player) {
   
-      if (dealer_card > 21) {
-        winner = player;
-        lose++;
-        return;
-      }
-    }
+      if (turn_player.score < 11) 
+        turn_player.score += 11;
+    else
+        turn_player.score+=1;
+    return turn_player.score;
+}
+
+//문자로 설정된 카드값 변환
+function calculateCardValue(card, turn_player) {
+
+    let cardValue;
+  switch(card)
+  {
+    case 'J' :
+        cardValue = 11;
+    case 'Q' :
+        cardValue = 12;
+    case 'K' :
+        cardValue = 13;
+  }
+
+  turn_player.score = turn_player + cardValue;
+    return turn_player.score;
+}
+
+//딜러 턴
+function DealerTurn() {
+    while (dealer_card < 17) {
+        const card = Rand();
+        showcard(card, BlackJack['Dealer']);
+        score(card, BlackJack['Dealer']);
     turnEnd = true;
     Winner();
-  }
-  
+    }
+}
+
+
 //승자 판별
 function Winner() {
 
@@ -150,4 +142,63 @@ function Winner() {
             }
         }
     }
+
+    result();
 }   //function Winner;
+
+//결과 보여주기
+function result() {
+    let msg;
+
+    if(turnEnd === true) 
+    {
+        if(winner === player)
+        {
+            document.querySelector('#win').textContent = win;
+            msg = '이겼습니다!'
+        } else if (winner === dealer)
+        {
+            document.querySelector('#draw').textContent = draw;
+            msg = '무승부입니다'
+        } else 
+        {
+            document.querySelector('#lose').textContent = lose;
+            msg = '졌습니다...'
+        }
+
+        document.querySelector('#Result').textContent = msg;
+    }
+    
+    gameOver = true;
+
+}
+
+//초기화
+function Deal() {
+
+    if(gameOver === true)
+    {
+        standing, turnEnd = false;
+        let player_img = document.querySelector(BlackJack['Player'].div).querySelectorAll('img');
+        let dealer_img = document.querySelector(BlackJack['Dealer'].div).querySelectorAll('img');
+
+        array.forEach(player_img => {
+            player_img[i].remove();
+        });
+        array.forEach(dealer_img => {
+            dealer_img[i].remove();
+        });
+
+        BlackJack['Player']['score'] = 0;
+        BlackJack['Dealer']['score'] = 0;
+
+        document.querySelector('#player_blackjack_point') = 0;
+        document.querySelector('#dealer_blackjack_point') = 0;
+        player_card, dealer_card = 0;
+    }
+    
+    winner = none;
+    standing = false;
+    turnEnd = false;
+}
+
