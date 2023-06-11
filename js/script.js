@@ -89,9 +89,41 @@ function Stand(){
     }
 }
 
-function Again()
 
+function Stand() {
+  if (hit === 1)  {
+      standing = true;
+      turnEnd = true;
+      DealerTurn();
+  }
+}
 
+function Again() {
+    player_card = 0;
+    dealer_card = 0;
+    winner = none;
+    standing = false;
+    turnEnd = false;
+  }
+
+  function DealerTurn() {
+    while (dealer_card < 17) {
+      let randomCardIndex = Math.floor(Math.random() * card.length);
+      let drawnCard = card[randomCardIndex];
+      dealer_card += getCardValue(drawnCard);
+      // 딜러에게 카드를 배분하는 로직을 추가했습니다.
+      // dealer_card 값을 업데이트합니다.
+  
+      if (dealer_card > 21) {
+        winner = player;
+        lose++;
+        return;
+      }
+    }
+    turnEnd = true;
+    Winner();
+  }
+  
 //승자 판별
 function Winner() {
 
