@@ -192,22 +192,14 @@ function Deal() {
         let player_img = document.querySelector(BlackJack.Player.div).querySelectorAll('img');
         let dealer_img = document.querySelector(BlackJack.Dealer.div).querySelectorAll('img');
 
-        while(i!=0)
+        for(i=0 ; i<player_img.length ; i++) 
         {
-            player_img.removeChild(cardimg);
-            i--;
+            player_img[i].remove();
         }
-        while(j!=0)
+        for(i=0 ; i<dealer_img.length ; i++)  //카드 이미지 삭제 함수
         {
-            dealer_img.removeChild(cardimg);
-            j--;
+            dealer_img[i].remove();
         }
-        //array.forEach(player_img => {
-          //  player_img[i].remove();
-        //});
-        //array.forEach(dealer_img => {
-        //    dealer_img[i].remove();
-        //});
 
         BlackJack.Player.score = 0;
         BlackJack.Dealer.score = 0;
