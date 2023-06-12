@@ -1,12 +1,12 @@
 const player=1, dealer=1, none = 0;   //플레이어, 딜러 
 let turn_player, player_card, dealer_card; //현재 턴 주인공
 let win, lose, draw = 0;    //승점
-let card = ['A','2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']    //카드 배열
+let card = [, 'A','2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']    //카드 배열 배열은 0부터 시작하기에 1부터 시작하도록 변경
 let standing, turnEnd, gameOver= false;   //stand 버튼 눌렀을 떄 활성화, 딜러 턴 끝났을때 활성화
 let BlackJack = {
   'Player' : {'scorespan' : '#player_blackjack_point', 'div' : '#player_area', 'score' : 0},
   'Dealer' : {'scorespan' : '#dealer_blackjack_point', 'div' : '#dealer_area', 'score' : 0},
-  'Card' : ['A','2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
+  'Card' : [, 'A','2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'],
   'Value' : {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7,'8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': [1, 11]},
 } ;
 
@@ -72,6 +72,10 @@ function score(card, turn_player){
         document.querySelector(turn_player['scorespan']).textContent = '버스트';
         Stand();
     }
+    else if(turn_player.score == 21) {
+        document.querySelector(turn_player['scorespan']).textContent = '블랙잭!';      //블랙잭일경우 추가
+        Stand();
+    }
     else
         document.querySelector(turn_player['scorespan']).textContent = turn_player.score;
 }
@@ -100,7 +104,7 @@ function calculateCardValue(card, turn_player) {
         cardValue = 13;
   }
 
-  turn_player.score = turn_player + cardValue;
+  turn_player.score = turn_player.score + cardValue;        //turn_player일 경우 카드가 그림카드면 오류 출력
     return turn_player.score;
 }
 
