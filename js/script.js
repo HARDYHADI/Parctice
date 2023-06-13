@@ -232,9 +232,7 @@ function Deal() {
       
         // 사용한 값들 전부 초기화
         msg = 0;
-        win = 0;
-        lose = 0;
-        draw = 0;
+        
 
         BlackJack.Player.score = 0;
         BlackJack.Dealer.score = 0;
