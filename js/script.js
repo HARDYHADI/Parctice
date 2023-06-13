@@ -1,6 +1,6 @@
-const player=1, dealer=1, none = 0;   //플레이어, 딜러 
+const player=1, dealer=2, none = 0;   //플레이어, 딜러의 값이 같으면 누가 이겼는지 판별 불가능 
 let turn_player, player_card, dealer_card=0, winner; //현재 턴 주인공
-let win, lose, draw = 0, i, j;    //승점
+let win=0, lose=0, draw = 0, i, j;    //승점 각각 0으로 초기화해야함. 안하면 undefined, NaN오류 출력
 let card = [, 'A','2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']    //카드 배열 배열은 0부터 시작하기에 1부터 시작하도록 변경
 let standing, turnEnd, gameOver= false;   //stand 버튼 눌렀을 떄 활성화, 딜러 턴 끝났을때 활성화
 let BlackJack = {
@@ -125,36 +125,65 @@ function DealerTurn() {
 }
 
 
-//승자 판별
+//승자 판별 if문의 어디가 작동안하는지 판별하기 위해 switch문으로 바꿔서 판별, 블랙잭일 경우 승/패 계산
 function Winner() {
-
-    if(BlackJack.Player.score > 21 && BlackJack.Dealer.score > 21) {  //둘 다 버스트
+    switch (true) {
+      case (BlackJack.Player.score > 21 && BlackJack.Dealer.score > 21):
+        // 둘 다 버스트
         winner = none;
         draw++;
-    } else if (BlackJack.Player.score > 21 && BlackJack.Dealer.score <= 21) {  //플레이어만 버스트 -> 패
+        break;
+      case (BlackJack.Player.score > 21 && BlackJack.Dealer.score < 21):
+        // 플레이어만 버스트 -> 패
         winner = dealer;
         lose++;
-    } else if (player_card <=21) {   //플레이어 버스트 X 한 상태
-        if(BlackJack.Dealer.score>21){         //딜러 버스트 -> 승
-            winner = player
-            win++;
-        } else if(BlackJack.Dealer.score<=21){  //딜러 버스트 X 한 상태
-            if(BlackJack.Player.score<BlackJack.Dealer.score){    //딜러 카드값이 근접 -> 패
-                winner = dealer;
-                lose++;
-            } else if (BlackJack.Player.score>BlackJack.Dealer.score){    //플레이어 카드값이 근접 -> 승
-                winner = player;
-                win++;
-            } else if (BlackJack.Player.score == BlackJack.Dealer.score){                        //동점 -> 무승부
-                winner = none;
-                draw++;
-            }
+        break;
+      case (BlackJack.Player.score < 21 && BlackJack.Dealer.score > 21):
+        //딜러 버스트 -> 
+        winner = player;
+        win++;
+        break;
+      case (BlackJack.Player.score == 21 && BlackJack.Dealer.score != 21):
+        // 플레이어 버스트 X, 딜러 버스트 -> 승
+        winner = player;
+        win++;
+        break;
+      case (BlackJack.Player.score != 21 && BlackJack.Dealer.score == 21):
+        // 플레이어 버스트 X, 딜러 블랙잭 -> 패
+        winner = dealer;
+        lose++;
+        break;
+      case (BlackJack.Player.score == 21 && BlackJack.Dealer.score == 21):
+        // 블랙잭 동점 -> 무승부
+        winner = none;
+        draw++;
+        break;
+      default:
+        // 플레이어 버스트 X, 딜러 버스트 X
+        if (BlackJack.Player.score < BlackJack.Dealer.score) {
+          // 딜러 카드값이 근접 -> 패
+          winner = dealer;
+          lose++;
+        } else if (BlackJack.Player.score > BlackJack.Dealer.score) {
+          // 플레이어 카드값이 근접 -> 승
+          winner = player;
+          win++;
+        } else if (BlackJack.Player.score == BlackJack.Dealer.score) {
+          // 동점 -> 무승부
+          winner = none;
+          draw++;
         }
+        break;
     }
-
+    // 함수가 정상 작동 했는지 판별
+    console.log(BlackJack.Player.score);
+    console.log(BlackJack.Dealer.score);
+    console.log(winner);
+    console.log(win);
+    console.log(lose);
+    console.log(draw);
     result();
-}   //function Winner;
-
+  }
 //결과 보여주기
 function result() {
     let msg;
@@ -200,12 +229,21 @@ function Deal() {
         {
             dealer_img[i].remove();
         }
+      
+        // 사용한 값들 전부 초기화
+        msg = 0;
+        win = 0;
+        lose = 0;
+        draw = 0;
 
         BlackJack.Player.score = 0;
         BlackJack.Dealer.score = 0;
 
         document.querySelector('#player_blackjack_point').textContent = 0;
         document.querySelector('#dealer_blackjack_point').textContent = 0;
+      
+        document.querySelector('#Result').textContent = 'BlackJack';
+
 
     }
     
