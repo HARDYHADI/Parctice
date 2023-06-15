@@ -54,10 +54,13 @@ const Rand = () => {
 
 //딜러 턴으로
 function Stand(){
+  // hit과 stand가 각각 한번씩 호출되어도 stand를 누르면 함수호출이 되어 점수판에 점수를 기록하는 오류를 턴엔드가 false일때 실행하도록 수정
+  if(!turnEnd){ 
     console.log('stand')
         standing = true;
         turnEnd = true;
         DealerTurn();
+  }
 }
 
 
@@ -74,11 +77,9 @@ function score(card, turn_player){
     if(turn_player.score>21)
     {
         document.querySelector(turn_player.scorespan).textContent = '버스트';
-        Stand();
     }
     else if(turn_player.score === 21) {
         document.querySelector(turn_player.scorespan).textContent = '블랙잭!';      //블랙잭일경우 추가
-        Stand();
     }
     else
         document.querySelector(turn_player.scorespan).textContent = turn_player.score;
