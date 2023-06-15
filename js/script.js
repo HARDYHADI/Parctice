@@ -29,6 +29,9 @@ function Hit() { //딜러가 Hit을 할 리는 없으니 player로
             showcard(card, BlackJack.Player);
             score(card, BlackJack.Player);
        }
+    if (BlackJack.Player.score > 21) {
+            standing = true;
+       }
 }
 
   
